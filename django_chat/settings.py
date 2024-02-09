@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'core',
+    'chat',
     'channels'
 ]
 
@@ -71,7 +72,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'django_chat.wsgi.application'
-ASGI_APPLICATION = 'django_chat.asgi.application'
+ASGI_APPLICATION = 'django_chat.asgi.application'  #NEW
+
+#NEW 
+CHANNEL_LAYERS = {
+    'default':{
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -124,3 +132,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#NEW
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'chat:home'
+LOGOUT_REDIRECT_URL = 'login'

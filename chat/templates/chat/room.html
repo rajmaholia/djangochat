@@ -1,0 +1,81 @@
+{% extends 'chat/_base.html' %}
+
+{% block title %}{{room.name}}{% endblock %}
+
+{% block content %} 
+<div class="container-fluid">
+    <div class=" row  h-100 mb-5" style="height:100vh">
+        <div class="col chats flex-column" id="chatContainer">
+            {% for message in messages %}
+            <div class="chat card w-50 mb-1">
+                <div class="card-header p-0 px-1 border-0 bg-white text-muted m-0">
+                    {{message.sender.username}}
+                </div>
+                <div class="card-body px-1 p-0 m-0 chat-message">
+                    {{message.content}}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="message-box fixed-bottom w-100">
+        <div class="input-group w-100">
+            <input type="text" class="flex-1" name="message" id="message">
+            <button class="btn btn-primary" id="messageSend">Send</button>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+
+{% block localjs %}
+{{room.id|json_script:"json_roomname"}}
+{{request.user.username|json_script:"json_username"}}
+
+<script>
+    let roomId = JSON.parse(document.getElementById('json_roomname').textContent)
+    let username = JSON.parse(document.getElementById('json_username').textContent)
+
+    let chatContainer = document.querySelector('#chatContainer');
+
+    const chatSocket = new WebSocket(
+        `ws://${window.location.host}/room/${roomId}/`
+    );
+
+    chatSocket.onmessage = function(e){
+        const data = JSON.parse(e.data);
+
+        chatContainer.innerHTML += `        
+            <div class="chat card w-50">
+                <div class="card-header p-0 px-1 border-0 bg-white text-muted m-0">
+                    ${data.username}
+                </div>
+                <div class="card-body m-0 px-1 p-0 chat-message">
+                    ${data.message}
+                </div>
+            </div>
+        `;
+    }
+
+
+
+
+
+    const messageInputEl = document.querySelector('#message');
+    const messageSendBtn = document.querySelector('#messageSend')
+
+    messageSendBtn.addEventListener('click',function(){
+        let message = messageInputEl.value;
+        if(message.trim().length != 0){
+            chatSocket.send(JSON.stringify({
+                username:username,
+                roomid:roomId,
+                message:message
+            }));
+            messageInputEl.value = ' ';
+        }
+    })
+</script>
+{% endblock localjs %}
